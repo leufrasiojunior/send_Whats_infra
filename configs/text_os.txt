@@ -1,0 +1,5 @@
+{apre}{nomes}!, tudo bem?!
+Sou consultora da SKY, é um prazer ter você com a gente! 😁
+Preciso agendar sua instalação referente a proposta *{props}*, mas não estou conseguindo falar com você no número informado.
+Podemos reagendar?
+
