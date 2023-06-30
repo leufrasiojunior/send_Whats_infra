@@ -8,12 +8,25 @@ import sys
 
 text_pgto = "configs/text_pgto.txt"
 arq_os = "configs/text_os.txt"
+arq_conf = "configs/send_whats.conf"
 
+# def get_configs():
+# with open(arq_conf, "r", encoding="utf-8") as config:
+#     vars = config.read()
+# linhas = vars.split("\n")
+# list_vars = {}
+# for linha in linhas:
+#     if "=" in linha:
+#         nome, valor = linha.split("=")
+#         list_vars[nome.strip()] = valor.strip()
+
+# time_send = int(list_vars["time_send"])
+# time_close_tab = int(list_vars["time_close_tab"])
 
 customtkinter.set_appearance_mode("light")
 app = customtkinter.CTk()
 app.geometry("550x250")
-app.title("Robot Control")
+app.title("Send Whats")
 app.resizable(False, False)
 
 
@@ -26,7 +39,6 @@ def btnno():
         "Certo!",
         "Reveja os valores do arquivo de texto. Lebre-se de trocar o nome para {nomes}.\nEste script somente envia textos com um nome.",
     )
-
 
 def text_os():
     text_file = open(arq_os, "w", encoding="utf-8")
@@ -59,7 +71,7 @@ def texto_personalizado():
     windowPerson.title("Texto Personalizado. Teste de visualização")
     windowPerson.resizable(True, False)
     lblPerson = customtkinter.CTkLabel(
-        windowPerson, text=conteudo_interpretado, font=("", 20), justify="left"
+        windowPerson, text=conteudo_interpretado, font=("", 20), justify="center"
     )
     lblPerson.place(relx=0.1, rely=0.5, anchor="nw")
     lblyesno = customtkinter.CTkLabel(
@@ -76,12 +88,41 @@ def texto_personalizado():
         relx=0.4, rely=0.2
     )
 
+
+
+def save_config():
+    file_conf = open(arq_conf, "w", encoding="utf-8")
+    time = close_config.get(1.0, END)
+    tab = time_config.get(1.0, END)
+    saveConf = {
+    "time_send": time,
+    "time_close_tab": tab
+}
+    for name, value in saveConf.items():
+        file_conf.write(f"{name}={value}")
+    file_conf.close()
+    app.withdraw()
+    save.destroy()
+    app.deiconify()
 def config():
+    with open(arq_conf, "r", encoding="utf-8") as config:
+        vars = config.read()
+    linhas = vars.split("\n")
+    list_vars = {}
+    for linha in linhas:
+        if "=" in linha:
+            nome, valor = linha.split("=")
+            list_vars[nome.strip()] = valor.strip()
+
+    time_send = int(list_vars["time_send"])
+    time_close_tab = int(list_vars["time_close_tab"])
     app.withdraw()
     def closeapp():
         config.destroy()
         app.deiconify()
     config = customtkinter.CTkToplevel(app)
+    global save
+    save = config
     config.protocol("WM_DELETE_WINDOW", closeapp)
     config.title("Configuração do Programa")
     config.geometry("700x180")
@@ -92,6 +133,8 @@ def config():
     label = customtkinter.CTkLabel(config, text="Tempo para aguardar o envio de mensagens.", justify="center")
     label.pack()
     label.place(x=80, y=40)
+    global time_config
+    global close_config
     time_config = customtkinter.CTkTextbox(
         config,
         width=50,
@@ -124,9 +167,14 @@ def config():
     )
     close_config.pack()
     close_config.place(x=480, y=65)
-    #Incluir o butão de SALVAR e já voltar para a página principal.
-
-
+    save_img = customtkinter.CTkImage(Image.open("images/salvar-arquivo.png"))
+    btnConfig = customtkinter.CTkButton(
+        config, text="Salvar", command=save_config, image=save_img
+    ).place(x=300, y=130)
+    #Tempo  envio e mensagens
+    time_config.insert("0.0", time_send)
+    #tempo fechar aba e enviar prox msg
+    close_config.insert("0.0", time_close_tab)
 
 
 def config_button():
