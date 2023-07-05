@@ -3,17 +3,20 @@ from tkinter import *
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 import shutil
-import sys
+from CTkMessagebox import CTkMessagebox
+import os
+import pandas as pd
 
 
 text_pgto = "configs/text_pgto.txt"
 arq_os = "configs/text_os.txt"
-
+arq_conf = "configs/send_whats.conf"
+# qtdNomes = 0
 
 customtkinter.set_appearance_mode("light")
 app = customtkinter.CTk()
 app.geometry("550x250")
-app.title("Robot Control")
+app.title("Send Whats")
 app.resizable(False, False)
 
 
@@ -26,7 +29,6 @@ def btnno():
         "Certo!",
         "Reveja os valores do arquivo de texto. Lebre-se de trocar o nome para {nomes}.\nEste script somente envia textos com um nome.",
     )
-
 
 def text_os():
     text_file = open(arq_os, "w", encoding="utf-8")
@@ -59,7 +61,7 @@ def texto_personalizado():
     windowPerson.title("Texto Personalizado. Teste de visualização")
     windowPerson.resizable(True, False)
     lblPerson = customtkinter.CTkLabel(
-        windowPerson, text=conteudo_interpretado, font=("", 20), justify="left"
+        windowPerson, text=conteudo_interpretado, font=("", 20), justify="center"
     )
     lblPerson.place(relx=0.1, rely=0.5, anchor="nw")
     lblyesno = customtkinter.CTkLabel(
@@ -76,12 +78,41 @@ def texto_personalizado():
         relx=0.4, rely=0.2
     )
 
+
+
+def save_config():
+    file_conf = open(arq_conf, "w", encoding="utf-8")
+    time = close_config.get(1.0, END)
+    tab = time_config.get(1.0, END)
+    saveConf = {
+    "time_send": tab,
+    "time_close_tab": time
+}
+    for name, value in saveConf.items():
+        file_conf.write(f"{name}={value}")
+    file_conf.close()
+    app.withdraw()
+    save.destroy()
+    app.deiconify()
 def config():
+    with open(arq_conf, "r", encoding="utf-8") as config:
+        vars = config.read()
+    linhas = vars.split("\n")
+    list_vars = {}
+    for linha in linhas:
+        if "=" in linha:
+            nome, valor = linha.split("=")
+            list_vars[nome.strip()] = valor.strip()
+
+    time_send = int(list_vars["time_send"])
+    time_close_tab = int(list_vars["time_close_tab"])
     app.withdraw()
     def closeapp():
         config.destroy()
         app.deiconify()
     config = customtkinter.CTkToplevel(app)
+    global save
+    save = config
     config.protocol("WM_DELETE_WINDOW", closeapp)
     config.title("Configuração do Programa")
     config.geometry("700x180")
@@ -92,6 +123,8 @@ def config():
     label = customtkinter.CTkLabel(config, text="Tempo para aguardar o envio de mensagens.", justify="center")
     label.pack()
     label.place(x=80, y=40)
+    global time_config
+    global close_config
     time_config = customtkinter.CTkTextbox(
         config,
         width=50,
@@ -124,18 +157,57 @@ def config():
     )
     close_config.pack()
     close_config.place(x=480, y=65)
-    #Incluir o butão de SALVAR e já voltar para a página principal.
+    save_img = customtkinter.CTkImage(Image.open("images/salvar-arquivo.png"))
+    btnConfig = customtkinter.CTkButton(
+        config, text="Salvar", command=save_config, image=save_img
+    ).place(x=300, y=130)
+    #Tempo  envio e mensagens
+    time_config.insert("0.0", time_send)
+    #tempo fechar aba e enviar prox msg
+    close_config.insert("0.0", time_close_tab)
 
+def load_base():
+    load_file = customtkinter.CTkToplevel(app)
+    app.withdraw()
+    def closeapp():
+        app.deiconify()
+    load_file.protocol("WM_DELETE_WINDOW", closeapp)
+    caminho_arquivo = filedialog.askopenfilename(filetypes=[('Arquivos do Excel', '*.xlsx')])
+    if caminho_arquivo:
+        pasta_destino = 'upload/'
+        if not os.path.exists(pasta_destino):
+            os.makedirs(pasta_destino)
+        nome_arquivo = caminho_arquivo.split('/')[-1]
+        caminho_destino = f'{pasta_destino}/{nome_arquivo}'
+        shutil.copy2(caminho_arquivo, caminho_destino)
+        print(f"Arquivo salvo em: {caminho_destino}")
+    else:
+        CTkMessagebox(title="Base não selecionada", message="Nenhuma base carregada.")
+    load_file.destroy()
+    app.deiconify()
+    n = 0
+    i = 0
+    p = 0
+    pc = 0
+    global nomes, tels, props, qtdNomes, soma
+    data_frame = pd.read_excel(f"{caminho_destino}")
+    nomes = (data_frame['Nome'].tolist())
+    tels = (data_frame['Telefone'].tolist())
+    props = (data_frame['Proposta'].tolist())
+    #pacote = (data_frame['Pacote'].tolist())
+    qtdNomes = len(nomes)
+    soma = 1
+    print(qtdNomes)
+    label2 = None
+    label = customtkinter.CTkLabel(app, text=f"Nomes a processar: {qtdNomes}", fg_color="#DBDBDB").place(x=225, y=50)
 
 
 
 def config_button():
     app.withdraw()
-
     def ao_fechar_segunda_janela():
         configWindow.destroy()
         app.deiconify()
-
     configWindow = customtkinter.CTkToplevel(app)
     configWindow.protocol("WM_DELETE_WINDOW", ao_fechar_segunda_janela)
     configWindow.title("Configuração de Texto")
@@ -205,7 +277,8 @@ frameimg = customtkinter.CTkFrame(
 frameform = customtkinter.CTkFrame(
     app, width=300, height=150, border_color="black", border_width=1, corner_radius=8,
 ).place(x=210, y=45)
-
+label2 = customtkinter.CTkLabel(app, text="Nenhuma base selecionada ainda.", fg_color="#DBDBDB").place(x=225, y=50)
+label2 = 0
 btnConfig = customtkinter.CTkButton(
     app, text="Configurar Textos", command=config_button, fg_color="#545455", text_color="white"
 ).place(x=400, y=5)
@@ -216,7 +289,7 @@ btnSend = customtkinter.CTkButton(
     app, text="Enviar Mensagens!", command=config_button
 ).place(x=95, y=210)
 btnload = customtkinter.CTkButton(
-    app, text="Carregar base", command=config_button, image=upload_img
+    app, text="Carregar base", command=load_base, image=upload_img
 ).place(x=295, y=210)
 
 img_config = customtkinter.CTkImage(Image.open("images/config.png"))

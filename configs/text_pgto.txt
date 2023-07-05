@@ -1,4 +1,3 @@
 {apre}{nomes}!
 Verifiquei que o pagamento da sua proposta *{props}* ainda não foi realizado e por essa razão a sua instalação não ocorreu.
 Consegue realizar o pagamento ainda hoje? Para garantir os descontos que foram concedidos no seu plano.
-
