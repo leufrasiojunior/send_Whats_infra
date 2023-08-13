@@ -5,13 +5,16 @@ from PIL import Image, ImageTk
 import shutil
 from CTkMessagebox import CTkMessagebox
 import os
+import random
+import string
 import pandas as pd
-
+import pywhatkit
+import webbrowser as web
+from urllib.parse import quote
 
 text_pgto = "configs/text_pgto.txt"
 arq_os = "configs/text_os.txt"
 arq_conf = "configs/send_whats.conf"
-# qtdNomes = 0
 
 customtkinter.set_appearance_mode("light")
 app = customtkinter.CTk()
@@ -19,6 +22,9 @@ app.geometry("550x250")
 app.title("Send Whats")
 app.resizable(False, False)
 
+def generate_random_name(length=10):
+    letters = string.ascii_letters
+    return ''.join(random.choice(letters) for _ in range(length))
 
 def btnyes():
     messagebox.showinfo("Certo!", "Certo! Os nomes serão processados agora.")
@@ -38,13 +44,16 @@ def text_os():
     text_file = open(text_pgto, "w", encoding="utf-8")
     text_file.write(textPgto.get(1.0, END),)
     text_file.close()
+    configWindow.destroy()
+    app.deiconify()
+    
 
 def texto_personalizado():
     apre = "Bom dia"
     nomes = ["Nome 1", "Nome 2"]
     txt_personalizado = filedialog.askopenfilename(
-        filetypes=[("Carregar texto personalizado", "*.txt")]
-    )
+        filetypes=[("Carregar texto personalizado", "*.txt")])
+    
     if txt_personalizado:
         folder_destiny = "upload/"
         filename_person = txt_personalizado.split("/")[-1]
@@ -52,14 +61,17 @@ def texto_personalizado():
         shutil.copy2(txt_personalizado, folder_desti)
         #
     file_personalized = folder_desti
+    
     with open(file_personalized, "r", encoding="utf-8") as arquivo:
         conteudo = arquivo.read()
     for nome in nomes:
         conteudo_interpretado = conteudo.format(apre=apre, nomes=nome)
+    
     windowPerson = customtkinter.CTkToplevel(app)
     windowPerson.geometry("1500x250")
     windowPerson.title("Texto Personalizado. Teste de visualização")
     windowPerson.resizable(True, False)
+    
     lblPerson = customtkinter.CTkLabel(
         windowPerson, text=conteudo_interpretado, font=("", 20), justify="center"
     )
@@ -77,8 +89,6 @@ def texto_personalizado():
     btnNo = customtkinter.CTkButton(windowPerson, text="Não", command=btnno).place(
         relx=0.4, rely=0.2
     )
-
-
 
 def save_config():
     file_conf = open(arq_conf, "w", encoding="utf-8")
@@ -117,10 +127,14 @@ def config():
     config.title("Configuração do Programa")
     config.geometry("700x180")
     config.resizable(False, False)
+
     aviso = customtkinter.CTkLabel(config, text="Configure os tempos para a aplicação funcionar antes de enviar a mensagem e a próxima mensagem.\nSempre com o tempo em segundos.", justify="center")
+    
     aviso.pack()
     aviso.place(x=60, y=2)
+    
     label = customtkinter.CTkLabel(config, text="Tempo para aguardar o envio de mensagens.", justify="center")
+    
     label.pack()
     label.place(x=80, y=40)
     global time_config
@@ -159,7 +173,9 @@ def config():
     close_config.place(x=480, y=65)
     save_img = customtkinter.CTkImage(Image.open("images/salvar-arquivo.png"))
     btnConfig = customtkinter.CTkButton(
-        config, text="Salvar", command=save_config, image=save_img
+        config, text="Salvar", 
+        command=save_config, 
+        image=save_img
     ).place(x=300, y=130)
     #Tempo  envio e mensagens
     time_config.insert("0.0", time_send)
@@ -173,6 +189,7 @@ def load_base():
         app.deiconify()
     load_file.protocol("WM_DELETE_WINDOW", closeapp)
     caminho_arquivo = filedialog.askopenfilename(filetypes=[('Arquivos do Excel', '*.xlsx')])
+    
     if caminho_arquivo:
         pasta_destino = 'upload/'
         if not os.path.exists(pasta_destino):
@@ -180,30 +197,31 @@ def load_base():
         nome_arquivo = caminho_arquivo.split('/')[-1]
         caminho_destino = f'{pasta_destino}/{nome_arquivo}'
         shutil.copy2(caminho_arquivo, caminho_destino)
-        print(f"Arquivo salvo em: {caminho_destino}")
+        # print(f"Arquivo salvo em: {caminho_destino}")
     else:
         CTkMessagebox(title="Base não selecionada", message="Nenhuma base carregada.")
+    
     load_file.destroy()
     app.deiconify()
     n = 0
     i = 0
     p = 0
     pc = 0
-    global nomes, tels, props, qtdNomes, soma
+    global nomes, tels, props, qtdNomes, soma, data_frame
     data_frame = pd.read_excel(f"{caminho_destino}")
     nomes = (data_frame['Nome'].tolist())
-    tels = (data_frame['Telefone'].tolist())
-    props = (data_frame['Proposta'].tolist())
+    # tels = (data_frame['Telefone'].tolist())
+    # props = (data_frame['Proposta'].tolist())
     #pacote = (data_frame['Pacote'].tolist())
     qtdNomes = len(nomes)
+
     soma = 1
-    print(qtdNomes)
-    label2 = None
-    label = customtkinter.CTkLabel(app, text=f"Nomes a processar: {qtdNomes}", fg_color="#DBDBDB").place(x=225, y=50)
 
 
-
+    if qtdNomes > 0:
+        label = customtkinter.CTkLabel(app, text=f"Nomes a processar: {qtdNomes}                                     ", fg_color="#DBDBDB").place(x=225, y=50)
 def config_button():
+    global configWindow
     app.withdraw()
     def ao_fechar_segunda_janela():
         configWindow.destroy()
@@ -211,7 +229,7 @@ def config_button():
     configWindow = customtkinter.CTkToplevel(app)
     configWindow.protocol("WM_DELETE_WINDOW", ao_fechar_segunda_janela)
     configWindow.title("Configuração de Texto")
-    configWindow.geometry("900x350")
+    configWindow.geometry("800x350")
     configWindow.resizable(False, False)
     # ---#
     label = customtkinter.CTkLabel(configWindow, text="Texto de Aguardando Pagamento")
@@ -259,10 +277,87 @@ def config_button():
     global btnSave
     btnSave = customtkinter.CTkButton(
         configWindow, text="Salvar configurações", command=text_os
-    ).place(x=350, y=300)
+    ).place(x=150, y=300)
     btnConfig = customtkinter.CTkButton(
         configWindow, text="Carregar texto personalizado", command=texto_personalizado
-    ).place(x=700, y=5)
+    ).place(x=500, y=300)
+
+def selection():
+    t = 0
+    apre="Bom dia "
+    optSelect = str(radio.get())
+
+
+    if optSelect == str(1):
+        name = (data_frame['Nome'].tolist())
+        tels = (data_frame['Telefone'].tolist())
+        props = (data_frame['Proposta'].tolist())
+        text_file = open(text_pgto, "r", encoding="utf-8")
+        conteudo = text_file.read()
+        for nome, prop in zip(name, props):
+            texto_formatado = conteudo.format(apre=apre, nomes=nome, props=prop)
+            pywhatkit.sendwhatmsg_instantly("+"+str(tels[t]), texto_formatado, 30, True, 7)
+            t = t +1
+    elif optSelect == str(2):
+        name = (data_frame['Nome'].tolist())
+        tels = (data_frame['Telefone'].tolist())
+        props = (data_frame['Proposta'].tolist())
+        text_file = open(arq_os, "r", encoding="utf-8")
+        conteudo = text_file.read()
+        for nome, prop in zip(name, props):
+            texto_os = conteudo.format(apre=apre, nomes=nome, props=prop)
+            pywhatkit.sendwhatmsg_instantly("+"+str(tels[t]), texto_os, 30, True, 7)
+            t = t +1
+    elif optSelect == str(3):
+        name = (data_frame['Nome'].tolist())
+        tels = (data_frame['Telefone'].tolist())
+        text_file = open(arq_os, "r", encoding="utf-8")
+        conteudo = text_file.read()
+        for nome, prop in zip(name, props):
+            texto_os = conteudo.format(apre=apre, nomes=nome, props=prop)
+            pywhatkit.sendwhatmsg_instantly("+"+str(tels[t]), texto_os, 30, True, 7)
+            t = t +1
+
+def questBases():
+    questBases = customtkinter.CTkToplevel(app)
+    questBases.title("Qual base está tentando enviar?")
+    questBases.geometry("660x150")
+    questBases.resizable(False, False)
+    global radio
+    radio = IntVar()
+    r1 = customtkinter.CTkRadioButton(questBases, text="Aguardando Pagamento", variable=radio, value=1).place(x=80, y=35)
+
+    r2 = customtkinter.CTkRadioButton(questBases, text="        O.S         ", variable=radio, value=2).place(x=270, y=35)
+
+    r3 = customtkinter.CTkRadioButton(questBases, text="Texto Customizado   ", variable=radio, value=3).place(x=400, y=35)
+
+    customtkinter.CTkButton(
+    questBases, 
+    text="Processar Telefones", 
+    command=selection, 
+    fg_color="#545455", 
+    text_color="white"
+).place(x=275, y=75)
+
+def send_messages():
+    confirmMessage = CTkMessagebox(title="Atenção no envio!", 
+    message="Não use em nenhum momento o PC.\nO Whatsapp Web terá que ser logado primeiro. Clique em continuar para iniciar o processo, ou cancelar para sair.", 
+    icon="warning", 
+    option_1="Continuar", 
+    option_2="Sair", 
+    width=500, 
+    height=200, 
+    border_color="white", 
+    fade_in_duration=5, 
+    corner_radius=10, 
+    justify="center")
+
+    response = confirmMessage.get()
+    if response == "Continuar":
+       questBases()
+    else:
+        return False
+
 
 
 frameimg = customtkinter.CTkFrame(
@@ -277,19 +372,33 @@ frameimg = customtkinter.CTkFrame(
 frameform = customtkinter.CTkFrame(
     app, width=300, height=150, border_color="black", border_width=1, corner_radius=8,
 ).place(x=210, y=45)
-label2 = customtkinter.CTkLabel(app, text="Nenhuma base selecionada ainda.", fg_color="#DBDBDB").place(x=225, y=50)
-label2 = 0
+
+label = customtkinter.CTkLabel(app, text="Nenhuma base selecionada ainda.", fg_color="#DBDBDB").place(x=225, y=50)
+app.update()
+
 btnConfig = customtkinter.CTkButton(
-    app, text="Configurar Textos", command=config_button, fg_color="#545455", text_color="white"
+    app, 
+    text="Configurar Textos", 
+    command=config_button, 
+    fg_color="#545455", 
+    text_color="white"
 ).place(x=400, y=5)
 
 upload_img = customtkinter.CTkImage(Image.open("images/upload.png"))
+send_img = customtkinter.CTkImage(Image.open("images/send.png"))
 
 btnSend = customtkinter.CTkButton(
-    app, text="Enviar Mensagens!", command=config_button
+    app, 
+    text="Enviar Mensagens!", 
+    command=send_messages,
+    image=send_img
 ).place(x=95, y=210)
+
 btnload = customtkinter.CTkButton(
-    app, text="Carregar base", command=load_base, image=upload_img
+    app, 
+    text="Carregar base", 
+    command=load_base, 
+    image=upload_img
 ).place(x=295, y=210)
 
 img_config = customtkinter.CTkImage(Image.open("images/config.png"))
