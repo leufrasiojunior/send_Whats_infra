@@ -5,6 +5,7 @@ from CTkMessagebox import CTkMessagebox
 import os, random, atexit, string, pywhatkit, shutil, customtkinter, sys, datetime
 import pandas as pd
 
+
 text_pgto = "configs/text_pgto.txt"
 arq_os = "configs/text_os.txt"
 arq_conf = "configs/send_whats.conf"
