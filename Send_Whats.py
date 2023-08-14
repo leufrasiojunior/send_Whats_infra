@@ -14,10 +14,10 @@ def redirect_output_to_file(filename):
     sys.stderr = open(filename, 'a')
 
 # Call the function to redirect outputs to a file
-redirect_output_to_file('output.log')
+redirect_output_to_file('logs/output.log')
 current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 separator = '-' * 40
-with open('output.log', 'a') as file:
+with open('logs/output.log', 'a') as file:
     file.write("\n" + separator + "\n")
     file.write("Script execution ended at: {}\n".format(current_time))
 
