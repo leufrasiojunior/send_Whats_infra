@@ -1,0 +1,70 @@
+Date: 14/8/2023
+Time: 12:9
+Phone Number: +5511900000000
+Message: Boa tardeNome 1!Teste de mensagens
+--------------------
+Date: 14/8/2023
+Time: 12:10
+Phone Number: +5511900000001
+Message: Boa tardeNome 2!Teste de mensagens
+--------------------
+Date: 14/8/2023
+Time: 12:11
+Phone Number: +5511900000002
+Message: Boa tardeNome 3!Teste de mensagens
+--------------------
+Date: 14/8/2023
+Time: 12:11
+Phone Number: +5511900000003
+Message: Boa tardeNome 4!Teste de mensagens
+--------------------
+Date: 14/8/2023
+Time: 12:12
+Phone Number: +5511900000004
+Message: Boa tardeNome 5!Teste de mensagens
+--------------------
+Date: 14/8/2023
+Time: 12:14
+Phone Number: +5511900000000
+Message: Boa tardeNome 1!, tudo bem?!Sou consultora da SKY, é um prazer ter você com a gente! 😁Preciso agendar sua instalação referente, mas não estou conseguindo falar com você no número informado.Podemos reagendar?
+--------------------
+Date: 14/8/2023
+Time: 12:14
+Phone Number: +5511900000001
+Message: Boa tardeNome 2!, tudo bem?!Sou consultora da SKY, é um prazer ter você com a gente! 😁Preciso agendar sua instalação referente, mas não estou conseguindo falar com você no número informado.Podemos reagendar?
+--------------------
+Date: 14/8/2023
+Time: 12:17
+Phone Number: +5511900000000
+Message: Boa tardeNome 1!Teste de mensagens
+--------------------
+Date: 14/8/2023
+Time: 12:17
+Phone Number: +5511900000001
+Message: Boa tardeNome 2!Teste de mensagens
+--------------------
+Date: 14/8/2023
+Time: 12:32
+Phone Number: +5511900000000
+Message: Boa tardeNome 1!Teste de mensagens
+--------------------
+Date: 14/8/2023
+Time: 12:34
+Phone Number: +5511900000000
+Message: Boa tardeNome 1!Teste de mensagens
+--------------------
+Date: 14/8/2023
+Time: 12:36
+Phone Number: +5511900000000
+Message: Boa tardeNome 1!Teste de mensagens
+--------------------
+Date: 14/8/2023
+Time: 12:39
+Phone Number: +5511900000000
+Message: Boa tardeNome 1!Teste de mensagens
+--------------------
+Date: 14/8/2023
+Time: 12:45
+Phone Number: +5511900000000
+Message: Boa tardeNome 1!Teste de mensagens
+--------------------
