@@ -1,20 +1,25 @@
-import customtkinter
 from tkinter import *
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
-import shutil
 from CTkMessagebox import CTkMessagebox
-import os
-import random
-import atexit
-import string
+import os, random, atexit, string, pywhatkit, shutil, customtkinter, sys, datetime
 import pandas as pd
-import pywhatkit
 
 text_pgto = "configs/text_pgto.txt"
 arq_os = "configs/text_os.txt"
 arq_conf = "configs/send_whats.conf"
 qtdNomes = 0
+def redirect_output_to_file(filename):
+    sys.stdout = open(filename, 'a')
+    sys.stderr = open(filename, 'a')
+
+# Call the function to redirect outputs to a file
+redirect_output_to_file('output.log')
+current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+separator = '-' * 40
+with open('output.log', 'a') as file:
+    file.write("\n" + separator + "\n")
+    file.write("Script execution ended at: {}\n".format(current_time))
 
 customtkinter.set_appearance_mode("light")
 app = customtkinter.CTk()
