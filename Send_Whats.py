@@ -17,6 +17,7 @@ def redirect_output_to_file(filename):
 # Call the function to redirect outputs to a file
 redirect_output_to_file('logs/output.log')
 current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+current_apre = datetime.datetime.now().strftime('%H')
 separator = '-' * 40
 with open('logs/output.log', 'a') as file:
     file.write("\n" + separator + "\n")
@@ -334,7 +335,12 @@ def config_button():
 
 def selection():
     t = 0
-    apre="Bom dia "
+    if int(current_apre) < 12:
+        apre = "Bom dia"
+    elif int(current_apre) >= 12 and int(current_apre) <= 18:
+        apre = "Boa tarde"
+    else:
+        apre = "Boa noite"
     optSelect = str(radio.get())
 
     #Ler o conteúdo dos tempos
@@ -409,29 +415,36 @@ def selection():
     corner_radius=10, 
     justify="center")
             return False
+        questbases.destroy()
         text_file = open(f"{folder_destiny}{new_file_path}", "r", encoding="utf-8")
         person_text = text_file.read()
         for nome in name:
             texto_os = person_text.format(apre=apre, nomes=nome)
             pywhatkit.sendwhatmsg_instantly("+"+str(tels[t]), texto_os, send_messages, True, close_tab)
             t = t +1
+        print (t)
+        print (qtdNomes)
+        if int(t) == int(qtdNomes):
+            messagebox.showinfo("Finalizado!", "Foram processados " + str(qtdNomes) + "Telefones")
+
         
 
 def questBases():
-    questBases = customtkinter.CTkToplevel(app)
-    questBases.title("Qual base está tentando enviar?")
-    questBases.geometry("660x150")
-    questBases.resizable(False, False)
+    global questbases
+    questbases = customtkinter.CTkToplevel(app)
+    questbases.title("Qual base está tentando enviar?")
+    questbases.geometry("660x150")
+    questbases.resizable(False, False)
     global radio
     radio = IntVar()
-    r1 = customtkinter.CTkRadioButton(questBases, text="Aguardando Pagamento", variable=radio, value=1).place(x=80, y=35)
+    r1 = customtkinter.CTkRadioButton(questbases, text="Aguardando Pagamento", variable=radio, value=1).place(x=80, y=35)
 
-    r2 = customtkinter.CTkRadioButton(questBases, text="        O.S         ", variable=radio, value=2).place(x=270, y=35)
+    r2 = customtkinter.CTkRadioButton(questbases, text="        O.S         ", variable=radio, value=2).place(x=270, y=35)
 
-    r3 = customtkinter.CTkRadioButton(questBases, text="Texto Customizado   ", variable=radio, value=3).place(x=400, y=35)
+    r3 = customtkinter.CTkRadioButton(questbases, text="Texto Customizado   ", variable=radio, value=3).place(x=400, y=35)
 
     customtkinter.CTkButton(
-    questBases, 
+    questbases, 
     text="Processar Telefones", 
     command=selection, 
     fg_color="#545455", 
