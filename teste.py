@@ -21,8 +21,7 @@ def configure_logger(file_name, level=logging.INFO):
 
 # Example usage of the function
 
-my_logger = configure_logger('log', level=logging.INFO)
-
+my_logger = configure_logger('log', level=logging.DEBUG)
 my_logger.debug('This is a debug message')
 my_logger.info('This is an information message')
 my_logger.warning('This is a warning message')
