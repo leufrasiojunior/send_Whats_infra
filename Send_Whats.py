@@ -8,49 +8,28 @@ import logging
 
 
 def configure_logger(file_name, level=logging.INFO):
-    # Set the desired log level
     logging.basicConfig(level=level)
-
-    # Create a logger with the file name
     logger = logging.getLogger(file_name)
-
-    # Create a handler to save logs to a file
-    file_handler = logging.FileHandler(file_name + '.log')
-
-    # Define the log format
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler = logging.FileHandler("logs/" + file_name + '.log')
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s')
     file_handler.setFormatter(formatter)
-
-    # Add the handler to the logger
     logger.addHandler(file_handler)
-
     return logger
-my_logger = configure_logger('example', level=logging.DEBUG)
 
-my_logger.debug('This is a debug message')
-my_logger.info('This is an information message')
-my_logger.warning('This is a warning message')
-my_logger.error('This is an error message')
-my_logger.critical('This is a critical message')
+my_logger = configure_logger('log', level=logging.INFO)
+my_logger.info('Program Started!')
 
 text_pgto = "configs/text_pgto.txt"
 arq_os = "configs/text_os.txt"
 arq_conf = "configs/send_whats.conf"
 qtdNomes = 0
-# def redirect_output_to_file(filename):
-#     sys.stdout = open(filename, 'a')
-#     sys.stderr = open(filename, 'a')
 
-# # Call the function to redirect outputs to a file
-# redirect_output_to_file('logs/output.log')
-# current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-# current_apre = datetime.datetime.now().strftime('%H')
-# separator = '-' * 40
-# with open('logs/output.log', 'a') as file:
-#     file.write("\n" + separator + "\n")
-#     file.write("Script execution ended at: {}\n".format(current_time))
+folder_path = 'configs/'
+if not os.path.exists(folder_path):
+    os.mkdir(folder_path)
 
-
+current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+current_apre = datetime.datetime.now().strftime('%H')
 
 customtkinter.set_appearance_mode("light")
 app = customtkinter.CTk()
@@ -60,31 +39,50 @@ app.resizable(False, False)
 
 def delete_files_on_exit(folder_path):
     file_list = os.listdir(folder_path)
-    for file_name in file_list:
-        file_path = os.path.join(folder_path, file_name)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
-
-folder_path = 'upload/'
-atexit.register(delete_files_on_exit, folder_path)
-def generate_bases():
-    xlsx_personalizado = filedialog.asksaveasfilename(
-        filetypes=[("Arquivos do Xlsx do Excel", ".xlsx")],
-        defaultextension=".xlsx",
-        initialfile="Base_Exemplo.xlsx",
-        confirmoverwrite=False,
-        title='Salvar base de Exemplo')
-    if xlsx_personalizado == '':
-        messagebox.showerror("Operação cancelada!", "Solicitação cancelada!")
+    if (len(file_list) == 0):
+        my_logger.info('No files do remove in upload folder.')
     else:
-        columns=['Nome','Telefone','Proposta']
-        names =  ['Nome 1','Nome 2','Nome 3','Nome 4', 'Nome 5']
-        teles = ['+5511900000000','+5511900000001','+5511900000002','+5511900000003','+5511900000004']
-        propostas  = [800123,800235,800,1,2]
-        #
-        df = pd.DataFrame(list(zip(names,teles,propostas)), columns=columns)
-        df.to_excel(xlsx_personalizado, index = False)
-        messagebox.showinfo("Arquivo salvo", "Arquivo salvo em " + xlsx_personalizado)
+        for file_name in file_list:
+            file_path = os.path.join(folder_path, file_name)
+            if os.path.isfile(file_path):
+                try:
+                    my_logger.info(f'File {file_path} Removed')
+                    os.remove(file_path)
+                    my_logger.info('Program finished')
+                    
+                except Exception as e:
+                    my_logger.info(f"Error removing {file_path} %s", str(e))
+                    
+folder_path = 'upload/'
+if not os.path.exists(folder_path):
+    os.mkdir(folder_path)
+atexit.register(delete_files_on_exit, folder_path)
+
+def generate_bases():
+    try:
+        xlsx_personalizado = filedialog.asksaveasfilename(
+            filetypes=[("Arquivos do Xlsx do Excel", ".xlsx")],
+            defaultextension=".xlsx",
+            initialfile="Base_Exemplo.xlsx",
+            confirmoverwrite=False,
+            title='Salvar base de Exemplo')
+        if xlsx_personalizado == '':
+            messagebox.showerror("Operação cancelada!", "Solicitação cancelada!")
+            my_logger.info('The process to save the example file has been canceled.')
+        else:
+            columns=['Nome','Telefone','Proposta']
+            names =  ['Nome 1','Nome 2','Nome 3','Nome 4', 'Nome 5']
+            teles = ['+5511900000000','+5511900000001','+5511900000002','+5511900000003','+5511900000004']
+            propostas  = [800123,800235,800,1,2]
+            #
+            df = pd.DataFrame(list(zip(names,teles,propostas)), columns=columns)
+            df.to_excel(xlsx_personalizado, index = False)
+            messagebox.showinfo("Arquivo salvo", "Arquivo salvo em " + xlsx_personalizado)
+        my_logger.info('File example saved {xlsx_personalizado} ')      
+    except Exception as SE:
+            messagebox.showerror("Arquivo não salvo!", "Falha no processo para salvar o arquivo de exemplo em " + xlsx_personalizado)
+            my_logger.warning(f'error when saving file to folder {xlsx_personalizado} %s', str(SE))
+        
 def generate_random_name(length=10):
     letters = string.ascii_letters
     return ''.join(random.choice(letters) for _ in range(length))
@@ -103,21 +101,26 @@ def btnno():
     )
 
 def text_os():
-    text_file = open(arq_os, "w", encoding="utf-8")
-    text_file.write(osBox.get(1.0, END))
-    text_file.close()
+    try:
+        text_file = open(arq_os, "w", encoding="utf-8")
+        text_file.write(osBox.get(1.0, END))
+        text_file.close()
 
-
-    text_file = open(text_pgto, "w", encoding="utf-8")
-    text_file.write(textPgto.get(1.0, END),)
-    text_file.close()
-    configWindow.destroy()
-    app.deiconify()
-    
+        text_file = open(text_pgto, "w", encoding="utf-8")
+        text_file.write(textPgto.get(1.0, END),)
+        my_logger.info('New OS or Payment messages have changed.')
+        
+        text_file.close()
+        configWindow.destroy()
+        app.deiconify()
+    except Exception as TG:
+        my_logger.critical(f'Error to save text files to config. %s', str(TG))
+        messagebox.showerror("Erro ao salvar!", "Falha no processo para salvar a configuração!: " + str(TG))
 
 def texto_personalizado():
+    my_logger.info('Process to upload a custom message started.')
     apre = "Bom dia"
-    nomes = ["Nome 1", "Nome 2"]
+    nomes = ["Nome 1"]
     txt_personalizado = filedialog.askopenfilename(
         filetypes=[("Carregar texto personalizado", "*.txt")])
     
@@ -133,37 +136,39 @@ def texto_personalizado():
     
     with open(file_personalized, "r", encoding="utf-8") as arquivo:
         conteudo = arquivo.read()
-    for nome in nomes:
-        conteudo_interpretado = conteudo.format(apre=apre, nomes=nome)
-    global windowPerson
-    windowPerson = customtkinter.CTkToplevel(app)
-    windowPerson.geometry("1500x250")
-    windowPerson.title("Texto Personalizado. Teste de visualização")
-    windowPerson.resizable(True, False)
-    
-    lblPerson = customtkinter.CTkLabel(
-        windowPerson, 
-        text=conteudo_interpretado, 
-        font=("", 20), 
-        justify="center")
-    
-    lblPerson.place(relx=0.1, rely=0.5, anchor="nw")
-    lblyesno = customtkinter.CTkLabel(
-        windowPerson,
-        text="Está aparecendo todos os nomes normalmente?",
-        font=("", 20),
-        justify="center",
-    )
-    lblyesno.place(relx=0.1, rely=0.1, anchor="nw")
-    btnYes = customtkinter.CTkButton(windowPerson, 
-                                     text="Sim", 
-                                     command=btnyes).place(relx=0.2, rely=0.2)
+    try:
+        for nome in nomes:
+            conteudo_interpretado = conteudo.format(apre=apre, nomes=nome)
+            global windowPerson
+            windowPerson = customtkinter.CTkToplevel(app)
+            windowPerson.geometry("1500x250")
+            windowPerson.title("Texto Personalizado. Teste de visualização")
+            windowPerson.resizable(True, True)
+            lblPerson = customtkinter.CTkLabel(
+                windowPerson, 
+                text=conteudo_interpretado, 
+                font=("", 20), 
+                justify="center")
+            lblPerson.place(relx=0.1, rely=0.5, anchor="nw")
+            lblyesno = customtkinter.CTkLabel(
+                windowPerson,
+                text="Está aparecendo todos os nomes normalmente?",
+                font=("", 20),
+                justify="center",
+            )
+            lblyesno.place(relx=0.1, rely=0.1, anchor="nw")
+            btnYes = customtkinter.CTkButton(windowPerson, 
+                                            text="Sim", 
+                                            command=btnyes).place(relx=0.2, rely=0.2)
 
-    btnNo = customtkinter.CTkButton(windowPerson, 
-                                    text="Não", 
-                                    command=btnno).place(relx=0.4, rely=0.2
-    )
-
+            btnNo = customtkinter.CTkButton(windowPerson, 
+                                            text="Não", 
+                                            command=btnno).place(relx=0.4, rely=0.2
+            )
+    except Exception as TP:
+        my_logger.error(f'Error loading custom file. Check the variable: %s', str(TP))
+        messagebox.showerror("Erro ao carregar o arquivo?!", "Falha no processo para carregar o arquivo! Verifique a variável" + str(TP))
+            
 def save_config():
     file_conf = open(arq_conf, "w", encoding="utf-8")
     time = close_config.get(1.0, END)
