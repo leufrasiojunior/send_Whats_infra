@@ -4,24 +4,53 @@ from PIL import Image, ImageTk
 from CTkMessagebox import CTkMessagebox
 import os, random, atexit, string, pywhatkit, shutil, customtkinter, sys, datetime
 import pandas as pd
+import logging
 
+
+def configure_logger(file_name, level=logging.INFO):
+    # Set the desired log level
+    logging.basicConfig(level=level)
+
+    # Create a logger with the file name
+    logger = logging.getLogger(file_name)
+
+    # Create a handler to save logs to a file
+    file_handler = logging.FileHandler(file_name + '.log')
+
+    # Define the log format
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(formatter)
+
+    # Add the handler to the logger
+    logger.addHandler(file_handler)
+
+    return logger
+my_logger = configure_logger('example', level=logging.DEBUG)
+
+my_logger.debug('This is a debug message')
+my_logger.info('This is an information message')
+my_logger.warning('This is a warning message')
+my_logger.error('This is an error message')
+my_logger.critical('This is a critical message')
 
 text_pgto = "configs/text_pgto.txt"
 arq_os = "configs/text_os.txt"
 arq_conf = "configs/send_whats.conf"
 qtdNomes = 0
-def redirect_output_to_file(filename):
-    sys.stdout = open(filename, 'a')
-    sys.stderr = open(filename, 'a')
+# def redirect_output_to_file(filename):
+#     sys.stdout = open(filename, 'a')
+#     sys.stderr = open(filename, 'a')
 
-# Call the function to redirect outputs to a file
-redirect_output_to_file('logs/output.log')
-current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-current_apre = datetime.datetime.now().strftime('%H')
-separator = '-' * 40
-with open('logs/output.log', 'a') as file:
-    file.write("\n" + separator + "\n")
-    file.write("Script execution ended at: {}\n".format(current_time))
+# # Call the function to redirect outputs to a file
+# redirect_output_to_file('logs/output.log')
+# current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+# current_apre = datetime.datetime.now().strftime('%H')
+# separator = '-' * 40
+# with open('logs/output.log', 'a') as file:
+#     file.write("\n" + separator + "\n")
+#     file.write("Script execution ended at: {}\n".format(current_time))
+
+
 
 customtkinter.set_appearance_mode("light")
 app = customtkinter.CTk()

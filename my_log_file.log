@@ -1,0 +1,4 @@
+2023-10-11 14:24:02,182 - my_log_file - INFO - This is an information message - <module> - my_log_file
+2023-10-11 14:24:02,182 - my_log_file - WARNING - This is a warning message - <module> - my_log_file
+2023-10-11 14:24:02,182 - my_log_file - ERROR - This is an error message - <module> - my_log_file
+2023-10-11 14:24:02,183 - my_log_file - CRITICAL - This is a critical message - <module> - my_log_file
