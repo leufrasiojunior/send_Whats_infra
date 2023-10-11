@@ -8,7 +8,7 @@ def configure_logger(file_name, level=logging.INFO):
     logger = logging.getLogger(file_name)
 
     # Create a handler to save logs to a file
-    file_handler = logging.FileHandler(file_name + '.log')
+    file_handler = logging.FileHandler("logs/" + file_name + '.log')
 
     # Define the log format
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(funcName)s')
@@ -21,7 +21,7 @@ def configure_logger(file_name, level=logging.INFO):
 
 # Example usage of the function
 
-my_logger = configure_logger('my_log_file', level=logging.INFO)
+my_logger = configure_logger('log', level=logging.INFO)
 
 my_logger.debug('This is a debug message')
 my_logger.info('This is an information message')

@@ -15,7 +15,7 @@ def configure_logger(file_name, level=logging.INFO):
     logger = logging.getLogger(file_name)
 
     # Create a handler to save logs to a file
-    file_handler = logging.FileHandler(file_name + '.log')
+    file_handler = logging.FileHandler("logs/" + file_name + '.log')
 
     # Define the log format
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -25,13 +25,15 @@ def configure_logger(file_name, level=logging.INFO):
     logger.addHandler(file_handler)
 
     return logger
-my_logger = configure_logger('example', level=logging.DEBUG)
+my_logger = configure_logger('log', level=logging.INFO)
+my_logger.info('Program Started!')
 
-my_logger.debug('This is a debug message')
-my_logger.info('This is an information message')
-my_logger.warning('This is a warning message')
-my_logger.error('This is an error message')
-my_logger.critical('This is a critical message')
+
+# my_logger.debug('This is a debug message')
+# my_logger.info('This is an information message')
+# my_logger.warning('This is a warning message')
+# my_logger.error('This is an error message')
+# my_logger.critical('This is a critical message')
 
 text_pgto = "configs/text_pgto.txt"
 arq_os = "configs/text_os.txt"
@@ -43,8 +45,8 @@ qtdNomes = 0
 
 # # Call the function to redirect outputs to a file
 # redirect_output_to_file('logs/output.log')
-# current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-# current_apre = datetime.datetime.now().strftime('%H')
+current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+current_apre = datetime.datetime.now().strftime('%H')
 # separator = '-' * 40
 # with open('logs/output.log', 'a') as file:
 #     file.write("\n" + separator + "\n")
@@ -68,23 +70,28 @@ def delete_files_on_exit(folder_path):
 folder_path = 'upload/'
 atexit.register(delete_files_on_exit, folder_path)
 def generate_bases():
-    xlsx_personalizado = filedialog.asksaveasfilename(
-        filetypes=[("Arquivos do Xlsx do Excel", ".xlsx")],
-        defaultextension=".xlsx",
-        initialfile="Base_Exemplo.xlsx",
-        confirmoverwrite=False,
-        title='Salvar base de Exemplo')
-    if xlsx_personalizado == '':
-        messagebox.showerror("Operação cancelada!", "Solicitação cancelada!")
-    else:
-        columns=['Nome','Telefone','Proposta']
-        names =  ['Nome 1','Nome 2','Nome 3','Nome 4', 'Nome 5']
-        teles = ['+5511900000000','+5511900000001','+5511900000002','+5511900000003','+5511900000004']
-        propostas  = [800123,800235,800,1,2]
-        #
-        df = pd.DataFrame(list(zip(names,teles,propostas)), columns=columns)
-        df.to_excel(xlsx_personalizado, index = False)
-        messagebox.showinfo("Arquivo salvo", "Arquivo salvo em " + xlsx_personalizado)
+    try:
+        xlsx_personalizado = filedialog.asksaveasfilename(
+            filetypes=[("Arquivos do Xlsx do Excel", ".xlsx")],
+            defaultextension=".xlsx",
+            initialfile="Base_Exemplo.xlsx",
+            confirmoverwrite=False,
+            title='Salvar base de Exemplo')
+        if xlsx_personalizado == '':
+            messagebox.showerror("Operação cancelada!", "Solicitação cancelada!")
+        else:
+            columns=['Nome','Telefone','Proposta']
+            names =  ['Nome 1','Nome 2','Nome 3','Nome 4', 'Nome 5']
+            teles = ['+5511900000000','+5511900000001','+5511900000002','+5511900000003','+5511900000004']
+            propostas  = [800123,800235,800,1,2]
+            #
+            df = pd.DataFrame(list(zip(names,teles,propostas)), columns=columns)
+            df.to_excel(xlsx_personalizado, index = False)
+            messagebox.showinfo("Arquivo salvo", "Arquivo salvo em " + xlsx_personalizado)
+        my_logger.info('File example saved {xlsx_personalizado} ')      
+    except:
+        my_logger.warning('error when saving file to folder {xlsx_personalizado} ')
+        
 def generate_random_name(length=10):
     letters = string.ascii_letters
     return ''.join(random.choice(letters) for _ in range(length))
