@@ -2,10 +2,19 @@ from tkinter import *
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 from CTkMessagebox import CTkMessagebox
-import os, random, atexit, string, pywhatkit, shutil, customtkinter, sys, datetime
+import os, random, atexit, string, pywhatkit, shutil, customtkinter, sys, datetime, requests
 import pandas as pd
 import logging
 
+
+# Configuração do validador d Whats
+
+headers = {
+	"content-type": "application/json",
+	"X-RapidAPI-Key": "43540365d7msh166745d0c9aa746p112efcjsn534dec584af4",
+	"X-RapidAPI-Host": "whatsapp-number-validator3.p.rapidapi.com"
+}
+url = "https://whatsapp-number-validator3.p.rapidapi.com/WhatsappNumberHasIt"
 
 def configure_logger(file_name, level=logging.INFO):
     logging.basicConfig(level=level)
@@ -290,9 +299,12 @@ def load_base():
     app.deiconify()
 
     global nomes, qtdNomes, data_frame
-    data_frame = pd.read_excel(f"{caminho_destino}")
-    nomes = (data_frame['Nome'].tolist())
-    qtdNomes = len(nomes)
+    try:
+        data_frame = pd.read_excel(f"{caminho_destino}")
+        nomes = (data_frame['Nome'].tolist())
+        qtdNomes = len(nomes)
+    except:
+        my_logger.info('No file selected, or an error occurred while loading the file.')
 
 
     if qtdNomes > 0:
@@ -409,8 +421,12 @@ def selection():
     justify="center")
             return False
         for nome, prop in zip(name, props):
+            payload = { "number": str(tels[t]) }
+            response = requests.post(url, json=payload, headers=headers)
+            numberisValid = response.json()
+            print (numberisValid)
             texto_formatado = conteudo.format(apre=apre, nomes=nome, props=prop)
-            pywhatkit.sendwhatmsg_instantly("+"+str(tels[t]), texto_formatado, send_messages, True, close_tab)
+            # pywhatkit.sendwhatmsg_instantly("+"+str(tels[t]), texto_formatado, send_messages, True, close_tab)
             t = t +1
     elif optSelect == str(2):
         try:
@@ -487,15 +503,7 @@ def questBases():
 
 def send_messages():
     if qtdNomes == 0:
-        CTkMessagebox(title="Base ainda não carregada", 
-    message="Você ainda não carregou nenhuma base para o sistema. Clique em OK para carregar agora.", 
-    icon="warning", 
-    option_1="Sair e carregar a base.",
-    width=500, 
-    height=200, 
-    border_color="white", 
-    corner_radius=10, 
-    justify="center")
+        CTkMessagebox(title="Base ainda não carregada", message="Você ainda não carregou nenhuma base para o sistema. Clique em OK para carregar agora.", icon="warning", option_1="Sair e carregar a base.", width=500, height=200, border_color="white", corner_radius=10, justify="center")
         load_base()
     else:
         confirmMessage = CTkMessagebox(title="Atenção no envio!", 
@@ -510,11 +518,12 @@ def send_messages():
     corner_radius=10, 
     justify="center")
         response = confirmMessage.get()
+        print (response)
+        print (response)
         if response == "Continuar":
             questBases()
         else:
             return False
-
 
 img_exa = customtkinter.CTkImage(Image.open("images/assets/logo.png"), size=(100,130))
 

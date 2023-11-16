@@ -1,4 +1,4 @@
-#!/home/leonald/Github/send_Whats_infra/bin/python3
+#!/home/leonald/Github/send_Whats_infra/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
