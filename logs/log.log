@@ -1,3 +1,0 @@
-2023-11-15 22:01:41,366 - log - INFO - Program Started! - <module>
-2023-11-15 22:01:53,531 - log - INFO - File upload/Base_Exemplo.xlsx Removed - delete_files_on_exit
-2023-11-15 22:01:53,533 - log - INFO - Program finished - delete_files_on_exit
