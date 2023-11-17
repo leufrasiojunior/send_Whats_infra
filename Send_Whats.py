@@ -8,9 +8,8 @@ import logging
 from dotenv import load_dotenv
 
 load_dotenv()
-
-# Configuração do validador d Whats
-
+########################################
+# Configuração do validador do Whats
 headers = {
     "content-type": "application/json",
     "X-RapidAPI-Key": os.getenv("X-RapidAPI-Key"),
@@ -18,6 +17,9 @@ headers = {
 }
 url = "https://whatsapp-number-validator3.p.rapidapi.com/WhatsappNumberHasIt"
 
+invalidNames = []
+invalidNumbers = []
+########################################
 
 def configure_logger(file_name, level=logging.INFO):
     logging.basicConfig(level=level)
@@ -65,10 +67,8 @@ def delete_files_on_exit(folder_path):
                     my_logger.info(f"File {file_path} Removed")
                     os.remove(file_path)
                     my_logger.info("Program finished")
-
                 except Exception as e:
                     my_logger.info(f"Error removing {file_path} %s", str(e))
-
 
 folder_path = "upload/"
 if not os.path.exists(folder_path):
@@ -77,6 +77,7 @@ atexit.register(delete_files_on_exit, folder_path)
 
 
 def generate_bases():
+    my_logger.info("The process to save the example file has been started.")
     try:
         xlsx_personalizado = filedialog.asksaveasfilename(
             filetypes=[("Arquivos do Xlsx do Excel", ".xlsx")],
@@ -105,7 +106,7 @@ def generate_bases():
             messagebox.showinfo(
                 "Arquivo salvo", "Arquivo salvo em " + xlsx_personalizado
             )
-        my_logger.info("File example saved {xlsx_personalizado} ")
+        my_logger.info("File example saved {xlsx_personalizado}")
     except Exception as SE:
         messagebox.showerror(
             "Arquivo não salvo!",
@@ -123,6 +124,7 @@ def generate_random_name(length=10):
 
 
 def btnyes():
+    my_logger.info("Custom text setting saved successfully.")
     messagebox.showinfo("Certo!", "Agora você pode voltar para enviar as mensagens.")
     windowPerson.destroy()
     configWindow.destroy()
@@ -130,6 +132,7 @@ def btnyes():
 
 
 def btnno():
+    my_logger.info("Custom text setting saved unsuccessfully.")
     messagebox.showinfo(
         "Certo!",
         "Reveja os valores do arquivo de texto. Lebre-se de trocar o nome para {nomes}.\nEste script somente envia textos com um nome.",
@@ -164,8 +167,7 @@ def texto_personalizado():
     apre = "Bom dia"
     nomes = ["Nome 1"]
     txt_personalizado = filedialog.askopenfilename(
-        filetypes=[("Carregar texto personalizado", "*.txt")]
-    )
+        filetypes=[("Carregar texto personalizado", "*.txt")])
 
     if txt_personalizado:
         global new_file_path
@@ -217,6 +219,7 @@ def texto_personalizado():
 
 
 def save_config():
+    my_logger.info("Time settings changed.")
     file_conf = open(arq_conf, "w", encoding="utf-8")
     time = close_config.get(1.0, END)
     tab = time_config.get(1.0, END)
@@ -321,6 +324,7 @@ def config():
 
 
 def load_base():
+    my_logger.info("Process to load the custom base started.")
     load_file = customtkinter.CTkToplevel(app)
     app.withdraw()
 
@@ -336,11 +340,13 @@ def load_base():
         pasta_destino = "upload/"
         if not os.path.exists(pasta_destino):
             os.makedirs(pasta_destino)
+            my_logger.info("Upload folder not found. The folder was created successfully.")
         nome_arquivo = caminho_arquivo.split("/")[-1]
         caminho_destino = f"{pasta_destino}/{nome_arquivo}"
         shutil.copy2(caminho_arquivo, caminho_destino)
-        # print(f"Arquivo salvo em: {caminho_destino}")
+        my_logger.info(f"File {nome_arquivo} loaded successfully")
     else:
+        my_logger.info("Base not selected. No base loaded.")
         CTkMessagebox(title="Base não selecionada", message="Nenhuma base carregada.")
 
     load_file.destroy()
@@ -351,6 +357,8 @@ def load_base():
         data_frame = pd.read_excel(f"{caminho_destino}")
         nomes = data_frame["Nome"].tolist()
         qtdNomes = len(nomes)
+        my_logger.info(f"File {caminho_destino} successfully loaded with a total of {qtdNomes} phones")
+        
     except:
         my_logger.info("No file selected, or an error occurred while loading the file.")
 
@@ -369,7 +377,6 @@ def config_button():
     def ao_fechar_segunda_janela():
         configWindow.destroy()
         app.deiconify()
-
     configWindow = customtkinter.CTkToplevel(app)
     configWindow.protocol("WM_DELETE_WINDOW", ao_fechar_segunda_janela)
     configWindow.title("Configuração de Texto")
@@ -472,8 +479,6 @@ def selection():
                 justify="center",
             )
             return False
-        invalidNames = []
-        invalidNumbers = []
         for nome, prop in zip(name, props):
             payload = {"number": str(tels[t])}
             response = requests.post(url, json=payload, headers=headers)
@@ -486,10 +491,11 @@ def selection():
                 teles = invalidNumbers
                 df = pd.DataFrame(list(zip(nomes, teles)), columns=columns)
                 df.to_excel("NumerosInvalidos.xlsx", index=False)
+                my_logger.info(f"A total of {qtdNomes} phones loaded, {len(invalidNames)} phones were invalid, and the base was created successfully.")
             texto_formatado = conteudo.format(apre=apre, nomes=nome, props=prop)
-            pywhatkit.sendwhatmsg_instantly(
-                "+" + str(tels[t]), texto_formatado, send_messages, True, close_tab
-            )
+            # pywhatkit.sendwhatmsg_instantly(
+            #     "+" + str(tels[t]), texto_formatado, send_messages, True, close_tab
+            # )
             t = t + 1
     elif optSelect == str(2):
         try:
@@ -524,9 +530,9 @@ def selection():
                 df = pd.DataFrame(list(zip(nomes, teles)), columns=columns)
                 df.to_excel("NumerosInvalidos.xlsx", index=False)
             texto_os = conteudo.format(apre=apre, nomes=nome, props=prop)
-            pywhatkit.sendwhatmsg_instantly(
-                "+" + str(tels[t]), texto_os, send_messages, True, close_tab
-            )
+            # pywhatkit.sendwhatmsg_instantly(
+            #     "+" + str(tels[t]), texto_os, send_messages, True, close_tab
+            # )
             t = t + 1
     elif optSelect == str(3):
         try:
@@ -561,12 +567,10 @@ def selection():
                 df = pd.DataFrame(list(zip(nomes, teles)), columns=columns)
                 df.to_excel("NumerosInvalidos.xlsx", index=False)
             texto_os = person_text.format(apre=apre, nomes=nome)
-            pywhatkit.sendwhatmsg_instantly(
-                "+" + str(tels[t]), texto_os, send_messages, True, close_tab
-            )
+            # pywhatkit.sendwhatmsg_instantly(
+            #     "+" + str(tels[t]), texto_os, send_messages, True, close_tab
+            # )
             t = t + 1
-        print(t)
-        print(qtdNomes)
         if int(t) == int(qtdNomes):
             messagebox.showinfo(
                 "Finalizado!", "Foram processados " + str(qtdNomes) + "Telefones"
@@ -604,6 +608,7 @@ def questBases():
 
 def send_messages():
     if qtdNomes == 0:
+        my_logger.info("Message sending process started before the base is loaded.")
         callLoad = CTkMessagebox(
             app,
             title="Base ainda não carregada",
@@ -620,25 +625,7 @@ def send_messages():
         if yes == "Sair e carregar a base.":
             load_base()
     else:
-        confirmMessage = CTkMessagebox(
-            app,
-            title="Atenção no envio!",
-            message="Não use em nenhum momento o PC.\nO Whatsapp Web terá que ser logado primeiro. Clique em continuar para iniciar o processo, ou cancelar para sair.",
-            icon="warning",
-            option_1="Continuar",
-            option_2="Sair",
-            width=500,
-            height=200,
-            border_color="white",
-            fade_in_duration=5,
-            corner_radius=10,
-            justify="center",
-        )
-        response = confirmMessage.get()
-        if response == "Continuar":
             questBases()
-        else:
-            return False
 
 
 img_exa = customtkinter.CTkImage(Image.open("images/assets/logo.png"), size=(100, 130))
