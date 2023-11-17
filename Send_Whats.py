@@ -32,7 +32,6 @@ def configure_logger(file_name, level=logging.INFO):
     logger.addHandler(file_handler)
     return logger
 
-
 my_logger = configure_logger("log", level=logging.INFO)
 my_logger.info("Program Started!")
 
