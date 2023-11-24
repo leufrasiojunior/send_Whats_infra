@@ -2,24 +2,10 @@ from tkinter import *
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 from CTkMessagebox import CTkMessagebox
-import os, random, atexit, string, pywhatkit, shutil, customtkinter, sys, datetime, requests
+import os, random, atexit, string, pywhatkit, shutil, customtkinter, sys, datetime
 import pandas as pd
 import logging
-from dotenv import load_dotenv
 
-load_dotenv()
-########################################
-# Configuração do validador do Whats
-headers = {
-    "content-type": "application/json",
-    "X-RapidAPI-Key": os.getenv("X-RapidAPI-Key"),
-    "X-RapidAPI-Host": "whatsapp-number-validator3.p.rapidapi.com",
-}
-url = "https://whatsapp-number-validator3.p.rapidapi.com/WhatsappNumberHasIt"
-
-invalidNames = []
-invalidNumbers = []
-########################################
 
 def configure_logger(file_name, level=logging.INFO):
     logging.basicConfig(level=level)
@@ -31,6 +17,7 @@ def configure_logger(file_name, level=logging.INFO):
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
     return logger
+
 
 my_logger = configure_logger("log", level=logging.INFO)
 my_logger.info("Program Started!")
@@ -69,6 +56,7 @@ def delete_files_on_exit(folder_path):
                 except Exception as e:
                     my_logger.info(f"Error removing {file_path} %s", str(e))
 
+
 folder_path = "upload/"
 if not os.path.exists(folder_path):
     os.mkdir(folder_path)
@@ -105,7 +93,7 @@ def generate_bases():
             messagebox.showinfo(
                 "Arquivo salvo", "Arquivo salvo em " + xlsx_personalizado
             )
-        my_logger.info("File example saved {xlsx_personalizado}")
+            my_logger.info(f"File example saved {xlsx_personalizado}")
     except Exception as SE:
         messagebox.showerror(
             "Arquivo não salvo!",
@@ -166,7 +154,8 @@ def texto_personalizado():
     apre = "Bom dia"
     nomes = ["Nome 1"]
     txt_personalizado = filedialog.askopenfilename(
-        filetypes=[("Carregar texto personalizado", "*.txt")])
+        filetypes=[("Carregar texto personalizado", "*.txt")]
+    )
 
     if txt_personalizado:
         global new_file_path
@@ -339,7 +328,9 @@ def load_base():
         pasta_destino = "upload/"
         if not os.path.exists(pasta_destino):
             os.makedirs(pasta_destino)
-            my_logger.info("Upload folder not found. The folder was created successfully.")
+            my_logger.info(
+                "Upload folder not found. The folder was created successfully."
+            )
         nome_arquivo = caminho_arquivo.split("/")[-1]
         caminho_destino = f"{pasta_destino}/{nome_arquivo}"
         shutil.copy2(caminho_arquivo, caminho_destino)
@@ -356,8 +347,10 @@ def load_base():
         data_frame = pd.read_excel(f"{caminho_destino}")
         nomes = data_frame["Nome"].tolist()
         qtdNomes = len(nomes)
-        my_logger.info(f"File {caminho_destino} successfully loaded with a total of {qtdNomes} phones")
-        
+        my_logger.info(
+            f"File {caminho_destino} successfully loaded with a total of {qtdNomes} phones"
+        )
+
     except:
         my_logger.info("No file selected, or an error occurred while loading the file.")
 
@@ -376,6 +369,7 @@ def config_button():
     def ao_fechar_segunda_janela():
         configWindow.destroy()
         app.deiconify()
+
     configWindow = customtkinter.CTkToplevel(app)
     configWindow.protocol("WM_DELETE_WINDOW", ao_fechar_segunda_janela)
     configWindow.title("Configuração de Texto")
@@ -479,23 +473,18 @@ def selection():
             )
             return False
         for nome, prop in zip(name, props):
-            payload = {"number": str(tels[t])}
-            response = requests.post(url, json=payload, headers=headers)
-            numberisValid = response.json()["status"]
-            if numberisValid == "invalid":
-                invalidNames.append(nome)
-                invalidNumbers.append(str(tels[t]))
-                columns = ["Nome", "Telefone"]
-                nomes = invalidNames
-                teles = invalidNumbers
-                df = pd.DataFrame(list(zip(nomes, teles)), columns=columns)
-                df.to_excel("NumerosInvalidos.xlsx", index=False)
-                my_logger.info(f"A total of {qtdNomes} phones loaded, {len(invalidNames)} phones were invalid, and the base was created successfully.")
             texto_formatado = conteudo.format(apre=apre, nomes=nome, props=prop)
-            # pywhatkit.sendwhatmsg_instantly(
-            #     "+" + str(tels[t]), texto_formatado, send_messages, True, close_tab
-            # )
+            progressVal = t / qtdNomes
+            stepVal = 0
+            stepVal = stepVal + progressVal
+            theProgBar.set(stepVal)
+            theProgBar.update_idletasks()
+            pywhatkit.sendwhatmsg_instantly(
+                "+" + str(tels[t]), texto_formatado, send_messages, True, close_tab
+            )
             t = t + 1
+            if t == qtdNomes:
+                messagebox.showinfo("Processo finalizado!", "Provesso finalizado")
     elif optSelect == str(2):
         try:
             name = data_frame["Nome"].tolist()
@@ -513,26 +502,21 @@ def selection():
                 corner_radius=10,
                 justify="center",
             )
-            return False
-        text_file = open(arq_os, "r", encoding="utf-8")
-        conteudo = text_file.read()
-        for nome, prop in zip(name, props):
-            payload = {"number": str(tels[t])}
-            response = requests.post(url, json=payload, headers=headers)
-            numberisValid = response.json()["status"]
-            if numberisValid == "invalid":
-                invalidNames.append(nome)
-                invalidNumbers.append(str(tels[t]))
-                columns = ["Nome", "Telefone"]
-                nomes = invalidNames
-                teles = invalidNumbers
-                df = pd.DataFrame(list(zip(nomes, teles)), columns=columns)
-                df.to_excel("NumerosInvalidos.xlsx", index=False)
+
+            text_file = open(arq_os, "r", encoding="utf-8")
+            conteudo = text_file.read()
             texto_os = conteudo.format(apre=apre, nomes=nome, props=prop)
-            # pywhatkit.sendwhatmsg_instantly(
-            #     "+" + str(tels[t]), texto_os, send_messages, True, close_tab
-            # )
+            progressVal = t / qtdNomes
+            stepVal = 0
+            stepVal = stepVal + progressVal
+            theProgBar.set(stepVal)
+            theProgBar.update_idletasks()
+            pywhatkit.sendwhatmsg_instantly(
+                "+" + str(tels[t]), texto_os, send_messages, True, close_tab
+            )
             t = t + 1
+            if t == qtdNomes:
+                messagebox.showinfo("Processo finalizado!", "Processo finalizado")
     elif optSelect == str(3):
         try:
             name = data_frame["Nome"].tolist()
@@ -549,31 +533,21 @@ def selection():
                 corner_radius=10,
                 justify="center",
             )
-            return False
-        questbases.destroy()
-        text_file = open(f"{folder_destiny}{new_file_path}", "r", encoding="utf-8")
-        person_text = text_file.read()
-        for nome in name:
-            payload = {"number": str(tels[t])}
-            response = requests.post(url, json=payload, headers=headers)
-            numberisValid = response.json()["status"]
-            if numberisValid == "invalid":
-                invalidNames.append(nome)
-                invalidNumbers.append(str(tels[t]))
-                columns = ["Nome", "Telefone"]
-                nomes = invalidNames
-                teles = invalidNumbers
-                df = pd.DataFrame(list(zip(nomes, teles)), columns=columns)
-                df.to_excel("NumerosInvalidos.xlsx", index=False)
+            questbases.destroy()
+            text_file = open(f"{folder_destiny}{new_file_path}", "r", encoding="utf-8")
+            person_text = text_file.read()
             texto_os = person_text.format(apre=apre, nomes=nome)
-            # pywhatkit.sendwhatmsg_instantly(
-            #     "+" + str(tels[t]), texto_os, send_messages, True, close_tab
-            # )
-            t = t + 1
-        if int(t) == int(qtdNomes):
-            messagebox.showinfo(
-                "Finalizado!", "Foram processados " + str(qtdNomes) + "Telefones"
+            progressVal = t / qtdNomes
+            stepVal = 0
+            stepVal = stepVal + progressVal
+            theProgBar.set(stepVal)
+            theProgBar.update_idletasks()
+            pywhatkit.sendwhatmsg_instantly(
+                "+" + str(tels[t]), texto_os, send_messages, True, close_tab
             )
+            t = t + 1
+        if t == qtdNomes:
+            messagebox.showinfo("Processo finalizado!", "Processo finalizado")
 
 
 def questBases():
@@ -602,7 +576,17 @@ def questBases():
         command=selection,
         fg_color="#545455",
         text_color="white",
-    ).place(x=275, y=75)
+    ).place(x=275, y=85)
+    global MyVaIc
+    MyVaIc = IntVar()
+    global theProgBar
+    theProgBar = customtkinter.CTkProgressBar(questbases, width=500, variable=MyVaIc)
+    # theProgBar.get()
+    label = customtkinter.CTkLabel(questbases, text="", fg_color="transparent")
+    label.pack(pady=100, padx=100)
+    # place(x=100, y=75)
+    label.configure(text=theProgBar.get())
+    theProgBar.pack(padx=10, pady=70)
 
 
 def send_messages():
@@ -624,7 +608,7 @@ def send_messages():
         if yes == "Sair e carregar a base.":
             load_base()
     else:
-            questBases()
+        questBases()
 
 
 img_exa = customtkinter.CTkImage(Image.open("images/assets/logo.png"), size=(100, 130))
