@@ -581,10 +581,7 @@ def questBases():
     MyVaIc = IntVar()
     global theProgBar
     theProgBar = customtkinter.CTkProgressBar(questbases, width=500, variable=MyVaIc)
-    # theProgBar.get()
     label = customtkinter.CTkLabel(questbases, text="", fg_color="transparent")
-    label.pack(pady=100, padx=100)
-    # place(x=100, y=75)
     label.configure(text=theProgBar.get())
     theProgBar.pack(padx=10, pady=70)
 
